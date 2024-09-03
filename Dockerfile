@@ -6,14 +6,16 @@ ENV HELM_TMP_ROOT="/tmp/install"
 
 # Architecture mapping
 RUN case $TARGETPLATFORM in \
-        "linux/arm/v5") ARCH="armv5";; \
-        "linux/arm/v6") ARCH="armv6";; \
+        "linux/arm/v5") ARCH="arm";; \
+        "linux/arm/v6") ARCH="arm";; \
         "linux/arm/v7") ARCH="arm";; \
         "linux/arm64") ARCH="arm64";; \
         "linux/386") ARCH="386";; \
         "linux/amd64") ARCH="amd64";; \
         "linux/i686") ARCH="386";; \
         "linux/i386") ARCH="386";; \
+        "linux/s390x") ARCH="s390x";; \
+        "linux/ppc64le") ARCH="ppc64le";; \
         *) echo "Unsupported architecture: $TARGETPLATFORM" && exit 1;; \
     esac \
     # Set variables
