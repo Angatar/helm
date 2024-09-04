@@ -1,8 +1,12 @@
+ARG APPNAME="helm"
+ARG APP_TMP_ROOT="/tmp/install"
 FROM --platform=$BUILDPLATFORM alpine:latest AS helper
 LABEL org.opencontainers.image.authors="d3fk"
 ARG TARGETPLATFORM
-ENV OS="linux"
-ENV HELM_TMP_ROOT="/tmp/install"
+ARG APPNAME
+ARG APP_TMP_ROOT
+ARG USERNAME=$APPNAME
+ARG OS="linux"
 
 # Architecture mapping
 RUN case $TARGETPLATFORM in \
@@ -20,35 +24,43 @@ RUN case $TARGETPLATFORM in \
     esac \
     # Set variables
     && TAG=$( wget https://get.helm.sh/helm-latest-version -q -O - 2>&1 || true ) \
-    && HELM_DIST="helm-$TAG-$OS-$ARCH.tar.gz" \
-    && DOWNLOAD_URL="https://get.helm.sh/$HELM_DIST" \
+    && APP_DIST="helm-$TAG-$OS-$ARCH.tar.gz" \
+    && DOWNLOAD_URL="https://get.helm.sh/$APP_DIST" \
     && CHECKSUM_URL="$DOWNLOAD_URL.sha256" \
-    && HELM_TMP_FILE="$HELM_TMP_ROOT/$HELM_DIST" \
-    && HELM_SUM_FILE="$HELM_TMP_ROOT/$HELM_DIST.sha256" \
-    && HELM_TMP="$HELM_TMP_ROOT/helm" \
+    && APP_TMP_FILE="$APP_TMP_ROOT/$APP_DIST" \
+    && APP_SUM_FILE="$APP_TMP_ROOT/$APP_DIST.sha256" \
+    && APP_TMP="$APP_TMP_ROOT/helm" \
     # Add openssl required for checksum
     && apk add --no-cache openssl \
     # Create install dir & download Helm + checksum
-    && mkdir "$HELM_TMP_ROOT" \
-    && wget -q -O "$HELM_SUM_FILE" "$CHECKSUM_URL" \
-    && wget -q -O "$HELM_TMP_FILE" "$DOWNLOAD_URL" \
+    && mkdir "$APP_TMP_ROOT" \
+    && wget -q -O "$APP_SUM_FILE" "$CHECKSUM_URL" \
+    && wget -q -O "$APP_TMP_FILE" "$DOWNLOAD_URL" \
     # Verify the checksum
-    && sum=$(openssl sha256 ${HELM_TMP_FILE} | awk '{print $2}') \
-    && expected_sum=$(cat ${HELM_SUM_FILE}) \
+    && sum=$(openssl sha256 ${APP_TMP_FILE} | awk '{print $2}') \
+    && expected_sum=$(cat ${APP_SUM_FILE}) \
     && [ "$sum" != "$expected_sum" ] \
-    && echo "SHA sum of ${HELM_TMP_FILE} does not match. Aborting." \
+    && echo "SHA sum of ${APP_TMP_FILE} does not match. Aborting." \
     && exit 1 || echo "Verifying checksum... Done." \
     # Extract Helm
-    && mkdir -p "$HELM_TMP" \
-    && tar xf "$HELM_TMP_FILE" -C "$HELM_TMP" \
-    && mv  "$HELM_TMP/$OS-$ARCH/helm" "$HELM_TMP/."
+    && mkdir -p "$APP_TMP" \
+    && tar xf "$APP_TMP_FILE" -C "$APP_TMP" \
+    && mv  "$APP_TMP/$OS-$ARCH/helm" "$APP_TMP/."\
+    # Creating user and group file to be exported in scratch for default user
+    && mkdir "$APP_TMP_ROOT/etc" \
+    && echo "$USERNAME:x:6009:6009:$USERNAME:/files:/sbin/nologin" > $APP_TMP_ROOT/etc/passwd \
+    && echo "$USERNAME:x:6009:"> $APP_TMP_ROOT/etc/group
 
 
 FROM scratch
+ARG APPNAME
+ARG APP_TMP_ROOT
 LABEL org.opencontainers.image.authors="d3fk"
-COPY --from=helper /tmp/install/helm/helm /helm
 
+COPY --from=helper $APP_TMP_ROOT/$APPNAME/$APPNAME /$APPNAME
+COPY --from=helper $APP_TMP_ROOT/etc /etc
+
+USER $APPNAME
 ENTRYPOINT ["/helm"]
 CMD ["--help"]
 WORKDIR /files
-
