@@ -56,6 +56,13 @@ FROM scratch
 ARG APPNAME
 ARG APP_TMP_ROOT
 LABEL org.opencontainers.image.authors="d3fk"
+LABEL org.opencontainers.image.source="https://github.com/Angatar/$APPNAME.git"
+LABEL org.opencontainers.image.url="https://github.com/Angatar/$APPNAME"
+LABEL org.opencontainers.image.base.name="docker.io/library/scratch"
+LABEL org.opencontainers.image.title="$APPNAME"
+LABEL org.opencontainers.image.description="Minimal container image only embedding \
+Helm 3 official binary from Scratch, updated monthly, really useful to manage helm \
+charts in your kubernetes clusters from any docker related environment"
 
 COPY --from=helper $APP_TMP_ROOT/$APPNAME/$APPNAME /$APPNAME
 COPY --from=helper $APP_TMP_ROOT/etc /etc
