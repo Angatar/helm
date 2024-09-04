@@ -58,30 +58,34 @@ To list all Helm releases of charts in your cluster:
 $ docker run --rm -v $HOME/.kube:/.kube -v $HOME/.config/helm:/.config/helm d3fk/helm list
 ```
 
+## Default user
+
+The container follows best practices by running with a non-root user named `helm` with a UID of 6009. This UID should avoid interference with existing users when working with your local filesystem.
+
 ## Working with Files
-If you need to use files with Helm (e.g., custom values.yaml), the container's working directory is set to `/files`. You can mount files into this directory and reference them in your Helm commands.
+If you need to use files with Helm (e.g., packaging your chart), the container's working directory is set to /files. You can mount your local files into this directory and reference them in your Helm commands.
+
+When working with files, you should either:
+
+1. ensure that your working directory mounted on `/files` has appropriate access rights for manipulation by a different user, **or**
+2. Use the `--user` option when running the Docker container.
 
 ### Example: packaging a chart directory into a chart archive
 ```sh
-$ docker run --rm -v $(pwd):/files -v $HOME/.kube:/.kube -v $HOME/.config/helm:/.config/helm d3fk/helm package my-local-chart-directory
+$ docker run --rm --user $(id -u):$(id -g) -v $(pwd):/files -v $HOME/.kube:/.kube -v $HOME/.config/helm:/.config/helm d3fk/helm package my-local-chart-directory
 ```
-Assuming `my-local-chart-directory` is the directory of the chart you need to package in your local folder
+In this example, `my-local-chart-directory` refers to the directory of the chart you need to package from your local folder.
 
 ## Using Helm Interactively
-If you need to use Helm interactively, such as inspecting charts or debugging, you can run the container with the `-ti` option.
-
-### Example: Debugging a Helm Chart
-```sh
-$ docker run -ti --rm -v $HOME/.kube:/.kube -v $HOME/.config/helm:/.config/helm d3fk/helm template my-chart --debug
-```
+In case you need to use Helm interactively, remember to run the container with the `-ti` options.
 
 ## Tips: Alias for Easier Access
 To simplify the usage of Helm via Docker, you can create an alias in your shell.
 
 ```sh
-alias helm='docker run --rm -ti -v $HOME/.kube:/.kube -v $HOME/.config/helm:/.config/helm d3fk/helm'
+alias helm='docker run --rm --user $(id -u):$(id -g) -ti -v $HOME/.kube:/.kube -v $HOME/.config/helm:/.config/helm d3fk/helm'
 ```
-You can then run d3fk/helm container commands as usual Helm commands e.g:
+You can then run d3fk/helm container commands as if they were standard Helm commands, e.g:
 ```sh
 $ helm install my-release stable/my-chart
 ```
