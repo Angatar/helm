@@ -83,7 +83,7 @@ In case you need to use Helm interactively, remember to run the container with t
 To simplify the usage of Helm via Docker, you can create an alias in your shell.
 
 ```sh
-alias helm='docker run --rm --user $(id -u):$(id -g) -ti -v $HOME/.kube:/.kube -v $HOME/.config/helm:/.config/helm d3fk/helm'
+alias helm='docker run --rm --user $(id -u):$(id -g) -ti -v $(pwd):/files -v $HOME/.kube:/.kube -v $HOME/.config/helm:/.config/helm d3fk/helm'
 ```
 You can then run d3fk/helm container commands as if they were standard Helm commands, e.g:
 ```sh
