@@ -66,6 +66,7 @@ charts in your kubernetes clusters from any docker related environment"
 
 COPY --from=helper $APP_TMP_ROOT/$APPNAME/$APPNAME /$APPNAME
 COPY --from=helper $APP_TMP_ROOT/etc /etc
+COPY --from=helper /etc/ssl/certs /etc/ssl/certs
 
 USER $APPNAME
 ENTRYPOINT ["/helm"]
