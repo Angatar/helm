@@ -83,6 +83,7 @@ In order to provide an existing path to mount Helm cache, configuration, and dat
 $ mkdir -p $HOME/.helm/.cache/helm $HOME/.helm/.config/helm $HOME/.helm/.local/share/helm
 
 ```
+*We are assuming here that the helm directories `.cache/helm`, `.config/helm` and `.local/share/helm` are all located into your local `$HOME/.helm/` directories.*
 
 You can then start configuring Helm by using the Helm command lines e.g:
 ```sh
@@ -106,7 +107,7 @@ $ docker run --rm --user $(id -u):$(id -g) -v $HOME/.kube:/.kube -v $HOME/.helm:
 
 ### Example: packaging a chart directory into a chart archive
 ```sh
-$ docker run --rm --user $(id -u):$(id -g) -v $(pwd):/files -v $HOME/.kube:/.kube -v $HOME/.config/helm:/.config/helm d3fk/helm package my-local-chart-directory
+$ docker run --rm --user $(id -u):$(id -g) -v $(pwd):/files -v $HOME/.kube:/.kube -v $HOME/.helm:/.helm d3fk/helm package my-local-chart-directory
 ```
 In this example, `my-local-chart-directory` refers to the directory of the chart you need to package from your local folder.
 
@@ -117,7 +118,7 @@ In case you need to use Helm interactively (no use case in mind but might exist)
 To simplify the usage of Helm via Docker, you can create an alias in your shell.
 
 ```sh
-alias helm='docker run --rm --user $(id -u):$(id -g) -ti -v $(pwd):/files -v $HOME/.kube:/.kube -v $HOME/.config/helm:/.config/helm d3fk/helm'
+alias helm='docker run --rm --user $(id -u):$(id -g) -ti -v $(pwd):/files -v $HOME/.kube:/.kube -v $HOME/.helm:/.helm d3fk/helm'
 ```
 
 You can then run d3fk/helm container commands as if they were standard Helm commands, e.g:
