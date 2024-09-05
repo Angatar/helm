@@ -29,7 +29,7 @@ RUN case $TARGETPLATFORM in \
     && CHECKSUM_URL="$DOWNLOAD_URL.sha256" \
     && APP_TMP_FILE="$APP_TMP_ROOT/$APP_DIST" \
     && APP_SUM_FILE="$APP_TMP_ROOT/$APP_DIST.sha256" \
-    && APP_TMP="$APP_TMP_ROOT/helm" \
+    && APP_TMP="$APP_TMP_ROOT/$APPNAME" \
     # Add openssl required for checksum
     && apk add --no-cache openssl \
     # Create install dir & download Helm + checksum
@@ -45,10 +45,10 @@ RUN case $TARGETPLATFORM in \
     # Extract Helm
     && mkdir -p "$APP_TMP" \
     && tar xf "$APP_TMP_FILE" -C "$APP_TMP" \
-    && mv  "$APP_TMP/$OS-$ARCH/helm" "$APP_TMP/."\
+    && mv  "$APP_TMP/$OS-$ARCH/$APPNAME" "$APP_TMP/."\
     # Creating user and group file to be exported in scratch for default user
     && mkdir "$APP_TMP_ROOT/etc" \
-    && echo "$USERNAME:x:6009:6009:$USERNAME:/files:/sbin/nologin" > $APP_TMP_ROOT/etc/passwd \
+    && echo "$USERNAME:x:6009:6009:$USERNAME:/:/sbin/nologin" > $APP_TMP_ROOT/etc/passwd \
     && echo "$USERNAME:x:6009:"> $APP_TMP_ROOT/etc/group
 
 
