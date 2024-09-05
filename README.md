@@ -45,7 +45,17 @@ This command will display the Helm help menu, listing available commands and mai
 The container follows best practices by running with a non-root user named `helm` with a UID of `6009`. This UID should avoid interference with existing users by default when working with your local filesystem (e.g, access to config files, mounted volumes...). However , to replicate the same behavior as if you were using Helm locally, it is advised to set the container user with your UID when running by using the `--user` option
 
 ## Working with Files
-As we'll make use of files with Helm (e.g., access your config files, package your charts), the container's working directory is set to `/files` (e.g. for your YAML charts) and the user home is set to `/` (e.g. used for confing files). You can mount your local files into those locations and reference them in your Helm commands.
+As we'll make use of files with Helm (e.g., access your config files, package your charts), the container's working directory is set to `/files` (e.g. for your YAML charts), the user home is set to `/` (e.g. used for confing files) and 3 environment variables have been set respectively for cache, configuration and data:
+
+```sh
+HELM_CACHE_HOME="/.helm/.cache/helm"
+HELM_CONFIG_HOME="/.helm/.config/helm"
+HELM_DATA_HOME="/.helm/.local/share/helm"
+```
+
+
+You can mount your local files into those locations and reference them in your Helm commands.
+The environment variables in the container can be overwritten in the docker run command to addapt the helm cache, configuration and data path to your needs.
 
 When working with files, you should either:
 
@@ -56,21 +66,42 @@ When working with files, you should either:
 To use your Helm configuration and connect to a Kubernetes cluster, mount your local Helm configuration and Kubernetes credentials into the container.
 
 ```sh
-$ docker run --rm --user $(id -u):$(id -g) -v $HOME/.kube:/.kube -v $HOME/.config/helm:/.config/helm d3fk/helm
+$ docker run --rm --user $(id -u):$(id -g) -v $HOME/.kube:/.kube -v $HOME/.helm:/.helm d3fk/helm
 ```
 In this example, we assume that the user running the container has appropriate access rights to the configuration files.
+
+### Migrating from exisiting configuration
+In case you already were using a local Helm, you can reuse your configuration by either
+- overwritting the cache, config and data environment variables in the docker run command, **or**
+- simply copy your `.cache/helm .config/helm .local/share/helm` into a directory that you'll be able to mount on the /.helm/ path location of the container
+
+### Configuring from scratch
+
+In order to provide an existing path to mount Helm cache, configuration, and data and avoid that the docker mount action creates the path with unappropriate right it is preferable to make the user create the empty directories ahead of running helm:
+
+```sh
+$ mkdir -p $HOME/.helm/.cache/helm $HOME/.helm/.config/helm $HOME/.helm/.local/share/helm
+
+```
+
+You can then start configuring Helm by using the Helm command lines e.g:
+```sh
+$ docker run --rm --user $(id -u):$(id -g) -v $HOME/.kube:/.kube -v $HOME/.helm:/.helm d3fk/helm repo add bitnami https://charts.bitnami.com/bitnami
+
+$ docker run --rm --user $(id -u):$(id -g) -v $HOME/.kube:/.kube -v $HOME/.helm:/.helm d3fk/helm repo update
+```
 
 ## Example of commands
 ### Example: Installing a Helm Chart
 To install a Helm chart, you can use the following command:
 ```sh
-$ docker run --rm --user $(id -u):$(id -g) -v $HOME/.kube:/.kube -v $HOME/.config/helm:/.config/helm d3fk/helm install my-release stable/my-chart
+$ docker run --rm --user $(id -u):$(id -g) -v $HOME/.kube:/.kube -v $HOME/.helm:/.helm d3fk/helm install my-release stable/my-chart
 ```
 
 ### Example: Listing Helm releases of charts
 To list all Helm releases of charts in your cluster:
 ```sh
-$ docker run --rm --user $(id -u):$(id -g) -v $HOME/.kube:/.kube -v $HOME/.config/helm:/.config/helm d3fk/helm list
+$ docker run --rm --user $(id -u):$(id -g) -v $HOME/.kube:/.kube -v $HOME/.helm:/.helm d3fk/helm list
 ```
 
 ### Example: packaging a chart directory into a chart archive
