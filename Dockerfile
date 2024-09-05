@@ -63,6 +63,7 @@ LABEL org.opencontainers.image.title="$APPNAME"
 LABEL org.opencontainers.image.description="Minimal container image only embedding \
 Helm 3 official binary from Scratch, updated monthly, really useful to manage helm \
 charts in your kubernetes clusters from any docker related environment"
+ENV HELM_*_HOME="$HOME/.helm"
 
 COPY --from=helper $APP_TMP_ROOT/$APPNAME/$APPNAME /$APPNAME
 COPY --from=helper $APP_TMP_ROOT/etc /etc
