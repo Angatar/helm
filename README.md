@@ -3,7 +3,7 @@
 # Lightweight Helm 3 Container from Scratch (Angatar > d3fk/helm)
 A super lightweight container built from scratch with Helm official binary, a default non-root user and ssl/tls validation capabilities (~52MB -> [![Docker Image Size](https://badgen.net/docker/size/d3fk/helm/latest?icon=docker&label=compressed&cache=600)](https://hub.docker.com/r/d3fk/helm/tags)). This container uses the [latest Helm binary](https://github.com/helm/helm/releases), fetched from the official Helm releases and built into a scratch image. It supports multiple architectures and is updated monthly to ensure you're using the latest stable version of Helm. The `d3fk/helm` container is ideal for managing and deploying Helm charts in your kubernetes clusters, and running Helm commands within CI/CD pipelines or other minimal environments.
 
-This container is also especially convenient with tiny/immutable linux distro such as [Flatcar Container Linux](https://github.com/flatcar/Flatcar), taking advantage of the immutability of Docker images without requiring the use of a package manager... see-> [Tips: Alias for Easier Access](#TipsAnchor)
+This container is also especially convenient with tiny/immutable linux distro such as [Flatcar Container Linux](https://github.com/flatcar/Flatcar), taking advantage of the immutability of Docker images without requiring the use of a package manager... see-> [Tips: Super fast setup](#TipsAnchor)
 
 
 ## Get this image (d3fk/helm)
@@ -128,24 +128,14 @@ In case you need to use Helm interactively (no use case in mind but might exist)
 <h4 id="TipsAnchor"></h4>
 To simplify the usage of Helm via Docker, you can simply create an alias in your shell or `.bashrc`, `.shrc`, `.rc`...
 
-```sh
-alias helm='docker run --rm --user $(id -u):$(id -g) -ti -v $(pwd):/files -v $HOME/.kube:/.kube -v $HOME/.helm:/.helm d3fk/helm'
-```
-
-You can then run d3fk/helm container commands as if they were standard Helm commands, e.g:
-```sh
-$ helm install my-release stable/my-chart
-```
-
-### Super fast volatile setup for one session
-In case you only need a rapid access to helm, assuming your kubernetes config is present in $HOME/.kube and accessible to the current user you can simply copy paste the following in your prompt
+### Super fast setup
+In case you only need a rapid access to Helm, assuming your kubernetes config is present in $HOME/.kube and accessible to the current user you can simply copy paste the following lines in your prompt
 
 ```sh
 mkdir -p $HOME/.helm/.cache/helm $HOME/.helm/.config/helm $HOME/.helm/.local/share/helm
 alias helm='docker run --rm --user $(id -u):$(id -g) -ti -v $(pwd):/files -v $HOME/.kube:/.kube -v $HOME/.helm:/.helm d3fk/helm'
 
 ```
-
 You can then run d3fk/helm container commands as if they were standard Helm commands, e.g:
 ```sh
 helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -154,8 +144,8 @@ helm search repo mariadb
 helm install mariadb bitnami/mariadb
 ```
 
-The configuration cache and data will be held in your `$HOME/.helm/` for any future access.
-To make Helm available from any future session simply add the alias in your launch shell script e.g `.bashrc`
+The Helm configuration, cache and data will be held in your `$HOME/.helm/` for any future access.
+As the alias was only added in your prompt it is only available for your current session, to make Helm available from any future session simply add the alias in your launch shell script e.g `.bashrc`
 
 ## License
 
